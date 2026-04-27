@@ -216,6 +216,7 @@ $(document).ready(function () {
         $toggle.show();
     });
 
+    // Hide/show toggle button based on scroll position (mobile only)
     $(window).on('scroll', function () {
         if (window.innerWidth <= 768 && !$tree.hasClass('visible')) {
             var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
@@ -257,6 +258,7 @@ $(document).ready(function () {
 </head>    
 
 <body> 
+    <!-- Toggle button for navigation tree (mobile only) -->
     <div id="nav-toggle" class="nav-toggle">
         <i class="fa fa-arrow-right"></i>
     </div>

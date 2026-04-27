@@ -52,54 +52,43 @@
                 }
             },
             'check_callback': true, // Enable custom callbacks for modifying the tree behavior
-        $(document).ready(function () {
-            const $tree = $('#tree');
-            const $toggle = $('#nav-toggle');
+		}).ready(function(){
+			var nid = window.location.hash.substr(1);
+			if (nid)
+			{
+				setTimeout(
+				  function() 
+				  {
+					t = $("#tree").jstree(true); 
+					t.deselect_all();
+					t.select_node(nid);
+				  }, 1000);
+			}
+		});
 
-            $toggle.on('click', function () {
-                $tree.toggleClass('visible');
-                const icon = $tree.hasClass('visible') ? 'fa-times' : 'fa-arrow-right';
-                $toggle.find('i').attr('class', `fa ${icon}`);
-                $toggle.show();
-            });
-
-            // Hide/show toggle button based on scroll position (mobile only)
-            $(window).on('scroll', function () {
-                if (window.innerWidth <= 768 && !$tree.hasClass('visible')) {
-                    var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-                    if (scrollTop > 100) {
-                        $toggle.hide();
-                    } else {
-                        $toggle.show();
-                    }
+        // Custom callback for determining valid children for nodes
+        jtree.on('check_callback', function(operation, node, node_parent, node_position, more) {
+            if (operation === 'copy_node' || operation === 'move_node') {
+                // Disallow copying or moving into a 'file' node (leaf node)
+                if (node_parent.type === 'file') {
+                    return false;
                 }
-            });
-
-            // Hide the tree panel when clicking outside of it or the toggle button
-            $(document).on('click', function (e) {
-                if ($tree.hasClass('visible')) {
-                    if ($(e.target).closest('#tree, #nav-toggle').length === 0) {
-                        $tree.removeClass('visible');
-                        $toggle.find('i').attr('class', 'fa fa-arrow-right');
-                        $toggle.show();
-                    }
-                }
-            });
-
-            $('#tree').on('changed.jstree', function (e, data) {
-                if (data && data.selected.length) {
-                    const selectedNode = data.instance.get_node(data.selected[0]);
-                    if (selectedNode && selectedNode.icon === '../images/file.png') {
-                        $tree.removeClass('visible');
-                        $toggle.find('i').attr('class', 'fa fa-arrow-right');
-                        if (window.innerWidth <= 768) {
-                            $toggle.show();
-                        }
-                    }
-                }
-            });
+            }
+            return true;
         });
-        </script>
+
+        $(document).ready(function () {
+            $("#plugins4").jstree({
+                "plugins" : [ "search" ]
+            });
+            var to = false;
+            $('#plugins4_q').keyup(function () {
+                if(to) { clearTimeout(to); }
+                to = setTimeout(function () {
+                var v = $('#plugins4_q').val();
+                $('#plugins4').jstree(true).search(v);
+                }, 250);
+            });
             
         });
 	
@@ -222,17 +211,29 @@ $(document).ready(function () {
 
     $toggle.on('click', function () {
         $tree.toggleClass('visible');
-        const icon = $tree.hasClass('visible') ? 'fa-arrow-left' : 'fa-arrow-right';
+        const icon = $tree.hasClass('visible') ? 'fa-times' : 'fa-arrow-right';
         $toggle.find('i').attr('class', `fa ${icon}`);
-        $toggle.toggle(!$tree.hasClass('visible'));
+        $toggle.show();
     });
 
+    // Hide/show toggle button based on scroll position (mobile only)
     $(window).on('scroll', function () {
         if (window.innerWidth <= 768 && !$tree.hasClass('visible')) {
             var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
             if (scrollTop > 100) {
                 $toggle.hide();
             } else {
+                $toggle.show();
+            }
+        }
+    });
+
+    // Hide the tree panel when clicking outside of it or the toggle button
+    $(document).on('click', function (e) {
+        if ($tree.hasClass('visible')) {
+            if ($(e.target).closest('#tree, #nav-toggle').length === 0) {
+                $tree.removeClass('visible');
+                $toggle.find('i').attr('class', 'fa fa-arrow-right');
                 $toggle.show();
             }
         }
@@ -257,6 +258,7 @@ $(document).ready(function () {
 </head>    
 
 <body> 
+    <!-- Toggle button for navigation tree (mobile only) -->
     <div id="nav-toggle" class="nav-toggle">
         <i class="fa fa-arrow-right"></i>
     </div>
